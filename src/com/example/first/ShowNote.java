@@ -26,6 +26,7 @@ public class ShowNote extends ListActivity {
     private long rowID;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+    	System.out.println("here in shownote");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         registerForContextMenu(getListView());

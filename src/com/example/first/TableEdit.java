@@ -14,13 +14,13 @@ public class TableEdit extends Activity {
     private Button button_confirm;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+    	System.out.println("in the edit");
         super.onCreate(savedInstanceState);
         dbHelper = new NotesDbAdapter(this);
         dbHelper.open(); 
         setContentView(R.layout.note_edit);//编辑的时候使用另一个UI
         findViews();
         showAndUpdateNote(savedInstanceState);
-		setTitle("新建话题");
     }
 
     private void findViews() {
