@@ -10,10 +10,10 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 public class NotesDbAdapter {
 
-        private static final String DATABASE_NAME = "notes.db";
+        private static final String DATABASE_NAME = "system_notes.db";
         private static final int DATABASE_VERSION = 1;
 
-        private static final String DATABASE_TABLE = "notes";
+        private static final String DATABASE_TABLE = "system_notes";
 
         public static final String KEY_ROWID = "_id";
         public static final String KEY_NOTE = "note";
@@ -49,7 +49,7 @@ public class NotesDbAdapter {
                 dbHelper.close();
         }
         
-        // add an table
+        // add a table
         public long createTable(String Note) {
                 Date now = new Date();
                 ContentValues args = new ContentValues();
