@@ -106,7 +106,7 @@ public class MainActivity extends ListActivity {
     }
     
     /**
-     * 长按菜单的选中事件
+     * 长按菜单的选中事件,here is changed!
      */
     @Override
     public boolean onContextItemSelected(MenuItem item) {
