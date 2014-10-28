@@ -27,7 +27,7 @@ public class MainActivity extends ListActivity {
         setContentView(R.layout.activity_main);
         registerForContextMenu(getListView());
         setAdapter();
-        setTitle("选择一个话题");
+        setTitle("话题");
     }
     private void setAdapter() {
         dbHelper = new NotesDbAdapter(this);
