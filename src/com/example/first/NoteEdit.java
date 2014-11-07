@@ -16,7 +16,7 @@ public class NoteEdit extends Activity {
     private String table;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-    	System.out.println("in the edit");
+    	System.out.println("in the edit"); 
         super.onCreate(savedInstanceState);
         dbHelper = new NotesDbAdapter(this);
         dbHelper.open(); 
