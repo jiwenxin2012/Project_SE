@@ -1,5 +1,8 @@
 package com.example.first;
 
+import java.util.ArrayList;
+
+import android.R.menu;
 import android.app.ListActivity;
 import android.content.Intent;
 import android.database.Cursor;
@@ -19,28 +22,31 @@ public class ShowNote extends ListActivity {
 	protected final int menuInsert=Menu.FIRST;
 	protected final int menuDelete=Menu.FIRST+1;
 	protected final int menuChange=Menu.FIRST+2;
+	protected final int menuSetConficts=Menu.FIRST+3;
+	protected final int menuShowConficts=Menu.FIRST+4;
+	protected final int menuCleanConficts=Menu.FIRST+5;
+	protected final int menuCleanColor=Menu.FIRST+6;
 	private static final int ACTIVITY_EDIT = 0x1001;
     private NotesDbAdapter dbHelper;
     private Cursor cursor;
     private String Table = null;
-    private long rowID;
+    private long rowID, centerID;
+    private ArrayList<Boolean> use;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-    	System.out.println("here in shownote");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         registerForContextMenu(getListView());
+        centerID=0;
         setAdapter();
         setTitle(Table);
+        
     }
     private void setAdapter() {
         dbHelper = new NotesDbAdapter(this);
         dbHelper.open();
         if (Table==null) {
         	Bundle extras = getIntent().getExtras();
-        	if (extras==null) {
-        		System.out.println("???");
-        	}
         	rowID = extras != null ? extras.getLong(NotesDbAdapter.KEY_ROWID) : null;
         	cursor=dbHelper.getTable(rowID);
         	Table = cursor.getString(cursor.getColumnIndexOrThrow(NotesDbAdapter.KEY_NOTE));
@@ -50,22 +56,24 @@ public class ShowNote extends ListActivity {
     private void fillData() {
         cursor = dbHelper.getall(Table);
         //startManagingCursor(cursor);
-
         String[] from = new String[]{"note"};
         int[] to = new int[]{android.R.id.text1};
-
-        SimpleCursorAdapter adapter = new SimpleCursorAdapter(this, 
+        getUse();
+        ColorListAdapter adapter = new ColorListAdapter(this, 
                                     android.R.layout.simple_list_item_1, 
                                     cursor, 
                                     from, 
                                     to,
-                                    CursorAdapter.FLAG_REGISTER_CONTENT_OBSERVER);
+                                    CursorAdapter.FLAG_REGISTER_CONTENT_OBSERVER,
+                                    use, centerID);
         setListAdapter(adapter);
     }
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
             menu.add(0,menuInsert,0,R.string.addNote);
             menu.add(0,menuChange,0,R.string.retto);
+            menu.add(0,menuCleanConficts,0,"«Â≥˝√¨∂‹");
+            menu.add(0,menuCleanColor,0,"«Â≥˝—’…´");
             return super.onCreateOptionsMenu(menu);
     }
     
@@ -86,12 +94,19 @@ public class ShowNote extends ListActivity {
                     break;
             case menuDelete:
             	dbHelper.delete(Table, getListView().getSelectedItemId());
-            	fillData();
             	break;
             case menuChange:
             	Intent intent2 = new Intent(this, MainActivity.class);
                 startActivity(intent2);
+                break;
+            case menuCleanColor:
+            	centerID=0;
+            	break;
+            case menuCleanConficts:
+            	dbHelper.deleteConfict(Table);
+            	break;
             }
+            fillData();
             return super.onOptionsItemSelected(item);
     }
     
@@ -107,6 +122,7 @@ public class ShowNote extends ListActivity {
         Intent intent = new Intent(this, NoteEdit.class);
         intent.putExtra(NotesDbAdapter.KEY_ROWID, id);
         intent.putExtra("TABLE", Table);
+        dbHelper.close();
         startActivityForResult(intent, ACTIVITY_EDIT);
     }
 
@@ -118,6 +134,7 @@ public class ShowNote extends ListActivity {
     protected void onActivityResult(int requestCode, int resultCode,
                                     Intent intent) {
         super.onActivityResult(requestCode, resultCode, intent);
+
         fillData();
     }
 
@@ -128,6 +145,8 @@ public class ShowNote extends ListActivity {
     public void onCreateContextMenu(ContextMenu menu, View v,
                     ContextMenuInfo menuInfo) {
             menu.add(0, menuDelete, 0,  "…æ≥˝»’÷æ");
+            menu.add(0, menuSetConficts, 0,  "…Ë÷√√¨∂‹");
+            menu.add(0, menuShowConficts, 0,  "œ‘ æ√¨∂‹");
             super.onCreateContextMenu(menu, v, menuInfo);
     }
     
@@ -143,11 +162,34 @@ public class ShowNote extends ListActivity {
                     case menuDelete : 
                             Log.d("MENU", "item"+info.id) ;
                             dbHelper.delete(Table, info.id) ; 
-                fillData() ; 
-                break ; 
+                            fillData() ; 
+                            break;
+                    case menuSetConficts : 
+                    	Intent intent = new Intent(this, ListEdit.class);
+                    	intent.putExtra(NotesDbAdapter.KEY_ROWID, info.id);
+                        intent.putExtra("TABLE", Table);
+                        startActivityForResult(intent, ACTIVITY_EDIT);
+                        centerID=info.id;
+                        fillData();
+                        break;
+                    case menuShowConficts: 
+                        centerID=info.id;
+                        fillData();
+                        break;
             }
             return super.onContextItemSelected(item);
     }
-	
+    private void getUse()
+    {
+    	if (centerID==0) return ;
+    	use = new ArrayList<Boolean>();
+    	for (int i=0; i<cursor.getCount(); i++)
+    		use.add(false);
+    	Cursor mCursor = dbHelper.getConfict(Table, centerID);
+    	while (mCursor.moveToNext()) {  
+	        int Nameindex = mCursor.getColumnIndex(NotesDbAdapter.KEY_B); 
+	        use.set(mCursor.getInt(Nameindex)-1, true);
+	    }  
+    }
 
 }

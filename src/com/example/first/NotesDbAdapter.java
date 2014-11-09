@@ -1,6 +1,7 @@
 package com.example.first;
 import java.util.Date;
 
+import android.R.integer;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
@@ -18,6 +19,8 @@ public class NotesDbAdapter {
         public static final String KEY_ROWID = "_id";
         public static final String KEY_NOTE = "note";
         public static final String KEY_CREATED = "created";
+        public static final String KEY_A = "role1";
+        public static final String KEY_B = "role2";
 
         private Context context = null;
         private DatabaseHelper dbHelper;
@@ -62,6 +65,13 @@ public class NotesDbAdapter {
                         + "created INTEGER,"
                         + "modified INTEGER" 
                         + ");");
+                db.execSQL("create table "+Note+"_conflict"
+                        +"("
+                        + "_id INTEGER PRIMARY KEY," 
+                        + "role1 INTEGER," 
+                        + "role2 INTEGER,"
+                        + "created INTEGER" 
+                        + ");");
                 return db.insert(DATABASE_TABLE, null, args);
         }
         
@@ -74,6 +84,7 @@ public class NotesDbAdapter {
         	        int Nameindex = mCursor.getColumnIndex(KEY_NOTE);  
         	        System.out.println(mCursor.getString(Nameindex));
         	        db.execSQL("DROP TABLE IF EXISTS " + mCursor.getString(Nameindex));
+        	        db.execSQL("DROP TABLE IF EXISTS " + mCursor.getString(Nameindex)+"_conflict");
         	    }  
                 return db.delete(DATABASE_TABLE, KEY_ROWID + "=" + rowId, null) > 0;
         }
@@ -103,9 +114,39 @@ public class NotesDbAdapter {
                 args.put(KEY_CREATED, now.getTime());
                 return db.insert(table, null, args);
         }
+        
+        // add a conflict
+        public long createConfict(String table, long a, long b) {
+                Date now = new Date();
+                ContentValues args = new ContentValues();
+                args.put(KEY_A, a); 
+                args.put(KEY_B, b); 
+                args.put(KEY_CREATED, now.getTime());
+                long id = db.insert(table+"_conflict", null, args);
+                System.out.println("db add " + a + " "+ b);
+                return id;
+        }
+        
+        // delete conflict
+        public void deleteConfict(String table, long a, long b) {
+        	db.execSQL("delete from "+table+"_conflict"+" where role1="+a+" and "+"role2="+b);
+        }
+        
+     // delete conflict
+        public void deleteConfict(String table) {
+        	db.execSQL("delete from "+table+"_conflict");
+        }
+        
+        // get conflict
+        public Cursor getConfict(String table, long id) {
+        	Cursor mCursor = db.rawQuery("select * from "+table+"_conflict"+" where role1="+id, null);
+        	return mCursor;
+        }
 
         // remove an entry
         public boolean delete(String table, long rowId) {
+        		db.delete(table+"_conflict", KEY_A + "=" + rowId, null);
+        		db.delete(table+"_conflict", KEY_B + "=" + rowId, null);
                 return db.delete(table, KEY_ROWID + "=" + rowId, null) > 0;
         }
 

@@ -64,6 +64,7 @@ public class MainActivity extends ListActivity {
             case menuInsert:
                     Intent intent = new Intent(this, TableEdit.class);
                     startActivityForResult(intent, ACTIVITY_EDIT);
+                    break;
             case menuDelete:
             	dbHelper.deleteTable(getListView().getSelectedItemId());
             	fillData();
