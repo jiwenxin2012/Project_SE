@@ -170,8 +170,8 @@ public class NotesDbAdapter {
 
         // get all entries
        public Cursor getall(String table) {
-                return db.query(table, new String[] { KEY_ROWID, KEY_NOTE,
-                                KEY_CREATED }, null, null, null, null, null);
+                return db.query(table, new String[] { KEY_ROWID, KEY_NOTE, KEY_CONTENTS, 
+                                KEY_SUMMARY, KEY_EXECUTOR, KEY_CREATED }, null, null, null, null, null);
         }
         
         // update

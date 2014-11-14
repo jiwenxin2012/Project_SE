@@ -1,6 +1,11 @@
 package com.example.first;
 
 import java.util.ArrayList;
+import java.util.List;
+
+import android.R.anim;
+import android.app.Activity;
+import android.app.ExpandableListActivity;
 import android.app.ListActivity;
 import android.content.Intent;
 import android.database.Cursor;
@@ -13,9 +18,11 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.ExpandableListView;
+import android.widget.ExpandableListView.ExpandableListContextMenuInfo;
 import android.widget.ListView;
 
-public class ShowNote extends ListActivity {
+public class ShowNote extends ExpandableListActivity {
 	protected final int menuInsert=Menu.FIRST;
 	protected final int menuDelete=Menu.FIRST+1;
 	protected final int menuChange=Menu.FIRST+2;
@@ -23,7 +30,10 @@ public class ShowNote extends ListActivity {
 	protected final int menuShowConficts=Menu.FIRST+4;
 	protected final int menuCleanConficts=Menu.FIRST+5;
 	protected final int menuCleanColor=Menu.FIRST+6;
+	protected final int menuEdit=Menu.FIRST+7;
 	private static final int ACTIVITY_EDIT = 0x1001;
+	private List<String> groupArray;  
+    private List<List<String>> childArray; 
     private NotesDbAdapter dbHelper;
     private Cursor cursor;
     private String Table = null;
@@ -32,8 +42,8 @@ public class ShowNote extends ListActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-        registerForContextMenu(getListView());
+        setContentView(R.layout.expandable_layout);
+        registerForContextMenu(getExpandableListView());
         centerID=0;
         setAdapter();
         setTitle(Table);
@@ -52,18 +62,22 @@ public class ShowNote extends ListActivity {
     }
     private void fillData() {
         cursor = dbHelper.getall(Table);
-        //startManagingCursor(cursor);
-        String[] from = new String[]{"note"};
-        int[] to = new int[]{android.R.id.text1};
         getUse();
+        groupArray = new ArrayList<String>();  
+        childArray = new ArrayList<List<String>>();  
+        while (cursor.moveToNext()) {
+        	List<String> tempArray01 = new ArrayList<String>();
+        	groupArray.add(cursor.getString(cursor.getColumnIndex(NotesDbAdapter.KEY_NOTE)));
+        	tempArray01.add(cursor.getString(cursor.getColumnIndex(NotesDbAdapter.KEY_CONTENTS))); 
+        	tempArray01.add(cursor.getString(cursor.getColumnIndex(NotesDbAdapter.KEY_SUMMARY)));
+        	tempArray01.add(cursor.getString(cursor.getColumnIndex(NotesDbAdapter.KEY_EXECUTOR)));
+        	childArray.add(tempArray01);  
+        }
         ColorListAdapter adapter = new ColorListAdapter(this, 
-                                    android.R.layout.simple_list_item_1, 
-                                    cursor, 
-                                    from, 
-                                    to,
-                                    CursorAdapter.FLAG_REGISTER_CONTENT_OBSERVER,
+                                    groupArray, 
+                                    childArray, 
                                     use, centerID);
-        setListAdapter(adapter);
+        getExpandableListView().setAdapter(adapter); 
     }
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -90,7 +104,7 @@ public class ShowNote extends ListActivity {
                     startActivityForResult(intent, ACTIVITY_EDIT);
                     break;
             case menuDelete:
-            	dbHelper.delete(Table, getListView().getSelectedItemId());
+            	dbHelper.delete(Table, getExpandableListView().getSelectedItemId());
             	break;
             case menuChange:
             	Intent intent2 = new Intent(this, MainActivity.class);
@@ -105,21 +119,6 @@ public class ShowNote extends ListActivity {
             }
             fillData();
             return super.onOptionsItemSelected(item);
-    }
-    
-
-    /**
-     * 当选中ListView 中的一个 View 时的动作
-     * 在这里作为 编辑备忘的入口  
-     */
-    @Override
-    protected void onListItemClick(ListView l, View v, int position, long id) {
-        super.onListItemClick(l, v, position, id);
-        System.out.println("click"+id);
-        Intent intent = new Intent(this, NoteEdit.class);
-        intent.putExtra(NotesDbAdapter.KEY_ROWID, id);
-        intent.putExtra("TABLE", Table);
-        startActivityForResult(intent, ACTIVITY_EDIT);
     }
 
     /**
@@ -141,6 +140,7 @@ public class ShowNote extends ListActivity {
     public void onCreateContextMenu(ContextMenu menu, View v,
                     ContextMenuInfo menuInfo) {
             menu.add(0, menuDelete, 0,  "删除日志");
+            menu.add(0, menuEdit, 0,  "编辑日志");
             menu.add(0, menuSetConficts, 0,  "设置矛盾");
             menu.add(0, menuShowConficts, 0,  "显示矛盾");
             super.onCreateContextMenu(menu, v, menuInfo);
@@ -152,32 +152,38 @@ public class ShowNote extends ListActivity {
     @Override
     public boolean onContextItemSelected(MenuItem item) {
     	
-            AdapterView.AdapterContextMenuInfo info;
-            info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
-            switch (item.getItemId()) { 
+    		ExpandableListContextMenuInfo info = (ExpandableListContextMenuInfo) item.getMenuInfo(); 
+    		long id = ExpandableListView.getPackedPositionGroup(info.packedPosition)+1; 
+    		switch (item.getItemId()) { 
                     case menuDelete : 
-                            Log.d("MENU", "item"+info.id) ;
-                            dbHelper.delete(Table, info.id) ; 
+                            Log.d("MENU", "group"+id) ;
+                            dbHelper.delete(Table, id) ; 
                             fillData() ; 
                             break;
                     case menuSetConficts : 
                     	Intent intent = new Intent(this, ListEdit.class);
-                    	intent.putExtra(NotesDbAdapter.KEY_ROWID, info.id);
+                    	intent.putExtra(NotesDbAdapter.KEY_ROWID, id);
                         intent.putExtra("TABLE", Table);
                         startActivityForResult(intent, ACTIVITY_EDIT);
-                        centerID=info.id;
+                        centerID=id;
                         fillData();
                         break;
                     case menuShowConficts: 
-                        centerID=info.id;
+                        centerID=id;
                         fillData();
+                        break;
+                    case menuEdit:
+                    	System.out.println("edit id:"+id);
+                        Intent intent2 = new Intent(this, NoteEdit.class);
+                        intent2.putExtra(NotesDbAdapter.KEY_ROWID, id);
+                        intent2.putExtra("TABLE", Table);
+                        startActivityForResult(intent2, ACTIVITY_EDIT);
                         break;
             }
             return super.onContextItemSelected(item);
     }
     private void getUse()
     {
-    	
     	use = new ArrayList<Boolean>();
     	for (int i=0; i<cursor.getCount(); i++)
     		use.add(false);

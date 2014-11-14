@@ -12,7 +12,7 @@ public class NoteEdit extends Activity {
     private NotesDbAdapter dbHelper;
     private EditText note, contents, summary, executor;
     private Button button_confirm;
-    private Long rowId;
+    private long rowId;
     private String table;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,7 +37,7 @@ public class NoteEdit extends Activity {
      * @param savedInstanceState
      */
     private void showAndUpdateNote(Bundle savedInstanceState) {
-        if (rowId == null) {
+        if (table == null) {
             Bundle extras = getIntent().getExtras();
             rowId = extras != null ? extras.getLong(NotesDbAdapter.KEY_ROWID) : null;
             table = extras != null ? extras.getString("TABLE") : null;
@@ -57,11 +57,19 @@ public class NoteEdit extends Activity {
      * Ìî³äÒª±à¼­µÄ±¸Íü
      */
     private void showNote() {
-        if (rowId != null) {
+        if (table != null) {
             Cursor Note = dbHelper.get(table, rowId);
-            //startManagingCursor(note);
             note.setText(Note.getString(
                     Note.getColumnIndexOrThrow(NotesDbAdapter.KEY_NOTE)
+                ));
+            contents.setText(Note.getString(
+                    Note.getColumnIndexOrThrow(NotesDbAdapter.KEY_CONTENTS)
+                ));
+            summary.setText(Note.getString(
+                    Note.getColumnIndexOrThrow(NotesDbAdapter.KEY_SUMMARY)
+                ));
+            executor.setText(Note.getString(
+                    Note.getColumnIndexOrThrow(NotesDbAdapter.KEY_EXECUTOR)
                 ));
         }
     }
