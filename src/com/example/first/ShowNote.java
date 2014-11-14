@@ -1,14 +1,11 @@
 package com.example.first;
 
 import java.util.ArrayList;
-
-import android.R.menu;
 import android.app.ListActivity;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.widget.CursorAdapter;
-import android.support.v4.widget.SimpleCursorAdapter;
 import android.util.Log;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
@@ -85,7 +82,7 @@ public class ShowNote extends ListActivity {
             switch(item.getItemId()) {
             case menuInsert:
                     String noteName = "New Note";
-                    long id = dbHelper.create(Table, noteName);
+                    long id = dbHelper.create(Table, noteName, null, null, null);
                     System.out.println("new"+id);
                     Intent intent = new Intent(this, NoteEdit.class);
                     intent.putExtra(NotesDbAdapter.KEY_ROWID, id);
@@ -122,7 +119,6 @@ public class ShowNote extends ListActivity {
         Intent intent = new Intent(this, NoteEdit.class);
         intent.putExtra(NotesDbAdapter.KEY_ROWID, id);
         intent.putExtra("TABLE", Table);
-        dbHelper.close();
         startActivityForResult(intent, ACTIVITY_EDIT);
     }
 
@@ -181,10 +177,11 @@ public class ShowNote extends ListActivity {
     }
     private void getUse()
     {
-    	if (centerID==0) return ;
+    	
     	use = new ArrayList<Boolean>();
     	for (int i=0; i<cursor.getCount(); i++)
     		use.add(false);
+    	if (centerID==0) return ;
     	Cursor mCursor = dbHelper.getConfict(Table, centerID);
     	while (mCursor.moveToNext()) {  
 	        int Nameindex = mCursor.getColumnIndex(NotesDbAdapter.KEY_B); 

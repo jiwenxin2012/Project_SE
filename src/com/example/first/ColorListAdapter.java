@@ -1,7 +1,5 @@
 package com.example.first;
 import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
  
 import android.content.Context;
 import android.database.Cursor;

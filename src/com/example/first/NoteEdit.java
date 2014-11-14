@@ -10,13 +10,12 @@ import android.widget.EditText;
 public class NoteEdit extends Activity {
     
     private NotesDbAdapter dbHelper;
-    private EditText field_note;
+    private EditText note, contents, summary, executor;
     private Button button_confirm;
     private Long rowId;
     private String table;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-    	System.out.println("in the edit"); 
         super.onCreate(savedInstanceState);
         dbHelper = new NotesDbAdapter(this);
         dbHelper.open(); 
@@ -26,7 +25,10 @@ public class NoteEdit extends Activity {
     }
 
     private void findViews() {
-        field_note = (EditText) findViewById(R.id.note);
+        note = (EditText) findViewById(R.id.note);
+        contents = (EditText) findViewById(R.id.contents);
+        summary = (EditText) findViewById(R.id.summary);
+        executor = (EditText) findViewById(R.id.executor);
         button_confirm = (Button) findViewById(R.id.confirm);
     }
 
@@ -43,7 +45,8 @@ public class NoteEdit extends Activity {
         showNote();
         button_confirm.setOnClickListener(new View.OnClickListener() {
             public void onClick(View view) {
-                dbHelper.update(table, rowId, field_note.getText().toString());
+                dbHelper.update(table, rowId, note.getText().toString(), contents.getText().toString(),
+                		summary.getText().toString(), executor.getText().toString());
                 setResult(RESULT_OK);
                 finish();
             }
@@ -55,10 +58,10 @@ public class NoteEdit extends Activity {
      */
     private void showNote() {
         if (rowId != null) {
-            Cursor note = dbHelper.get(table, rowId);
+            Cursor Note = dbHelper.get(table, rowId);
             //startManagingCursor(note);
-            field_note.setText(note.getString(
-                    note.getColumnIndexOrThrow(NotesDbAdapter.KEY_NOTE)
+            note.setText(Note.getString(
+                    Note.getColumnIndexOrThrow(NotesDbAdapter.KEY_NOTE)
                 ));
         }
     }

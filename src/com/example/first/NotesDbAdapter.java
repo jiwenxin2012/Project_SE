@@ -1,7 +1,5 @@
 package com.example.first;
 import java.util.Date;
-
-import android.R.integer;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
@@ -17,7 +15,10 @@ public class NotesDbAdapter {
         private static final String DATABASE_TABLE = "notes";
 
         public static final String KEY_ROWID = "_id";
+        public static final String KEY_CONTENTS = "contents";
         public static final String KEY_NOTE = "note";
+        public static final String KEY_SUMMARY = "summary";
+        public static final String KEY_EXECUTOR = "executor";
         public static final String KEY_CREATED = "created";
         public static final String KEY_A = "role1";
         public static final String KEY_B = "role2";
@@ -62,6 +63,9 @@ public class NotesDbAdapter {
                         +"("
                         + "_id INTEGER PRIMARY KEY," 
                         + "note TEXT," 
+                        + "contents TEXT," 
+                        + "summary TEXT," 
+                        + "executor TEXT," 
                         + "created INTEGER,"
                         + "modified INTEGER" 
                         + ");");
@@ -107,10 +111,13 @@ public class NotesDbAdapter {
         }
         
         // add an entry
-        public long create(String table, String Note) {
+        public long create(String table, String note, String contents, String summary, String executor) {
                 Date now = new Date();
                 ContentValues args = new ContentValues();
-                args.put(KEY_NOTE, Note);
+                args.put(KEY_NOTE, note);
+                args.put(KEY_CONTENTS, contents);
+                args.put(KEY_SUMMARY, summary);
+                args.put(KEY_EXECUTOR, executor);
                 args.put(KEY_CREATED, now.getTime());
                 return db.insert(table, null, args);
         }
@@ -153,7 +160,7 @@ public class NotesDbAdapter {
         // query single entry
         public Cursor get(String table, long rowId) throws SQLException {
                 Cursor mCursor = db.query(true, table, new String[] {
-                                KEY_ROWID, KEY_NOTE, KEY_CREATED }, KEY_ROWID + "=" + rowId,
+                                KEY_ROWID, KEY_NOTE, KEY_CONTENTS, KEY_SUMMARY, KEY_EXECUTOR, KEY_CREATED }, KEY_ROWID + "=" + rowId,
                                 null, null, null, null, null);
                 if (mCursor != null) {
                         mCursor.moveToFirst();
@@ -168,9 +175,12 @@ public class NotesDbAdapter {
         }
         
         // update
-        public boolean update(String table, long rowId, String note) {
+        public boolean update(String table, long rowId, String note, String contents, String summary, String executor) {
                 ContentValues args = new ContentValues();
                 args.put(KEY_NOTE, note);
+                args.put(KEY_CONTENTS, contents);
+                args.put(KEY_SUMMARY, summary);
+                args.put(KEY_EXECUTOR, executor);
                 return db.update(table, args, KEY_ROWID + "=" + rowId, null) > 0;
         }
         
