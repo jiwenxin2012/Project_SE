@@ -18,7 +18,7 @@ public class TableEdit extends Activity {
         super.onCreate(savedInstanceState);
         dbHelper = new NotesDbAdapter(this);
         dbHelper.open(); 
-        setContentView(R.layout.note_edit);//编辑的时候使用另一个UI
+        setContentView(R.layout.table_edit);//编辑的时候使用另一个UI
         findViews();
         showAndUpdateNote(savedInstanceState);
     }

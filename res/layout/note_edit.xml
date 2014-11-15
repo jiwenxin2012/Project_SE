@@ -9,6 +9,29 @@
         android:layout_height="wrap_content"
         android:hint="@string/edit"
         />
+    <EditText 
+        android:id="@+id/contents"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:hint="内容"
+        />
+    <TextView 
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="结论："
+        />
+    <EditText 
+        android:id="@+id/summary"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:hint="摘要"
+        />
+    <EditText 
+        android:id="@+id/executor"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:hint="执行者"
+        />
 	<Button 
 	    android:id="@+id/confirm"
 	    android:layout_width="wrap_content"

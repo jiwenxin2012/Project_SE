@@ -10,13 +10,12 @@ import android.widget.EditText;
 public class NoteEdit extends Activity {
     
     private NotesDbAdapter dbHelper;
-    private EditText field_note;
+    private EditText note, contents, summary, executor;
     private Button button_confirm;
-    private Long rowId;
+    private long rowId;
     private String table;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-    	System.out.println("in the edit"); 
         super.onCreate(savedInstanceState);
         dbHelper = new NotesDbAdapter(this);
         dbHelper.open(); 
@@ -26,7 +25,10 @@ public class NoteEdit extends Activity {
     }
 
     private void findViews() {
-        field_note = (EditText) findViewById(R.id.note);
+        note = (EditText) findViewById(R.id.note);
+        contents = (EditText) findViewById(R.id.contents);
+        summary = (EditText) findViewById(R.id.summary);
+        executor = (EditText) findViewById(R.id.executor);
         button_confirm = (Button) findViewById(R.id.confirm);
     }
 
@@ -35,7 +37,7 @@ public class NoteEdit extends Activity {
      * @param savedInstanceState
      */
     private void showAndUpdateNote(Bundle savedInstanceState) {
-        if (rowId == null) {
+        if (table == null) {
             Bundle extras = getIntent().getExtras();
             rowId = extras != null ? extras.getLong(NotesDbAdapter.KEY_ROWID) : null;
             table = extras != null ? extras.getString("TABLE") : null;
@@ -43,7 +45,8 @@ public class NoteEdit extends Activity {
         showNote();
         button_confirm.setOnClickListener(new View.OnClickListener() {
             public void onClick(View view) {
-                dbHelper.update(table, rowId, field_note.getText().toString());
+                dbHelper.update(table, rowId, note.getText().toString(), contents.getText().toString(),
+                		summary.getText().toString(), executor.getText().toString());
                 setResult(RESULT_OK);
                 finish();
             }
@@ -54,11 +57,19 @@ public class NoteEdit extends Activity {
      * Ìî³äÒª±à¼­µÄ±¸Íü
      */
     private void showNote() {
-        if (rowId != null) {
-            Cursor note = dbHelper.get(table, rowId);
-            //startManagingCursor(note);
-            field_note.setText(note.getString(
-                    note.getColumnIndexOrThrow(NotesDbAdapter.KEY_NOTE)
+        if (table != null) {
+            Cursor Note = dbHelper.get(table, rowId);
+            note.setText(Note.getString(
+                    Note.getColumnIndexOrThrow(NotesDbAdapter.KEY_NOTE)
+                ));
+            contents.setText(Note.getString(
+                    Note.getColumnIndexOrThrow(NotesDbAdapter.KEY_CONTENTS)
+                ));
+            summary.setText(Note.getString(
+                    Note.getColumnIndexOrThrow(NotesDbAdapter.KEY_SUMMARY)
+                ));
+            executor.setText(Note.getString(
+                    Note.getColumnIndexOrThrow(NotesDbAdapter.KEY_EXECUTOR)
                 ));
         }
     }
