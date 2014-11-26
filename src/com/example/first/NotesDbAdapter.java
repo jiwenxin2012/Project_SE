@@ -109,6 +109,15 @@ public class NotesDbAdapter {
                 }
                 return mCursor;
         }
+        // query several table
+        public Cursor searchTable(String name) throws SQLException {
+        	String current_sql_sel = "SELECT  * FROM "+DATABASE_TABLE +" where "+KEY_NOTE+" like '%"+name+"%'";
+        	Cursor mCursor = db.rawQuery(current_sql_sel, null);
+                if (mCursor != null) {
+                        mCursor.moveToFirst();
+                }
+                return mCursor;
+        }
         
         // add an entry
         public long create(String table, String note, String contents, String summary, String executor) {
@@ -167,7 +176,6 @@ public class NotesDbAdapter {
                 }
                 return mCursor;
         }
-
         // get all entries
        public Cursor getall(String table) {
                 return db.query(table, new String[] { KEY_ROWID, KEY_NOTE, KEY_CONTENTS, 

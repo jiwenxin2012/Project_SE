@@ -1,6 +1,9 @@
 package com.example.first;
 
+import android.R.string;
+import android.app.AlertDialog;
 import android.app.ListActivity;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
@@ -13,11 +16,13 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.EditText;
 import android.widget.ListView;
 
 public class MainActivity extends ListActivity {
 	protected final int menuInsert=Menu.FIRST;
 	protected final int menuDelete=Menu.FIRST+1;
+	protected final int menuSearch=Menu.FIRST+2;
 	private static final int ACTIVITY_EDIT = 0x1001;
     private NotesDbAdapter dbHelper;
     private Cursor cursor;
@@ -49,9 +54,25 @@ public class MainActivity extends ListActivity {
                                     CursorAdapter.FLAG_REGISTER_CONTENT_OBSERVER);
         setListAdapter(adapter);
     }
+    private void fillData(String item) {
+        cursor = dbHelper.searchTable(item);
+        //startManagingCursor(cursor);
+
+        String[] from = new String[]{"note"};
+        int[] to = new int[]{android.R.id.text1};
+
+        SimpleCursorAdapter adapter = new SimpleCursorAdapter(this, 
+                                    android.R.layout.simple_list_item_1, 
+                                    cursor, 
+                                    from, 
+                                    to,
+                                    CursorAdapter.FLAG_REGISTER_CONTENT_OBSERVER);
+        setListAdapter(adapter);
+    }
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
             menu.add(0,menuInsert,0,R.string.addTable);
+            menu.add(0,menuSearch,0,"≤È—Øª∞Ã‚");
             return super.onCreateOptionsMenu(menu);
     }
     
@@ -65,6 +86,19 @@ public class MainActivity extends ListActivity {
                     Intent intent = new Intent(this, TableEdit.class);
                     startActivityForResult(intent, ACTIVITY_EDIT);
                     break;
+            case menuSearch:
+            	final EditText inputServer = new EditText(this);
+                AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                builder.setTitle("Server").setIcon(android.R.drawable.ic_dialog_info).setView(inputServer)
+                        .setNegativeButton("Cancel", null);
+                builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                    		String input = inputServer.getText().toString();
+                    		fillData(input);
+                     }
+                });
+                builder.show();
+                break;
             case menuDelete:
             	dbHelper.deleteTable(getListView().getSelectedItemId());
             	fillData();
