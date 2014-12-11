@@ -5,8 +5,10 @@ import java.util.List;
 
 import android.R.anim;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.ExpandableListActivity;
 import android.app.ListActivity;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
@@ -18,6 +20,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.EditText;
 import android.widget.ExpandableListView;
 import android.widget.ExpandableListView.ExpandableListContextMenuInfo;
 import android.widget.ListView;
@@ -31,6 +34,7 @@ public class ShowNote extends ExpandableListActivity {
 	protected final int menuCleanConficts=Menu.FIRST+5;
 	protected final int menuCleanColor=Menu.FIRST+6;
 	protected final int menuEdit=Menu.FIRST+7;
+	protected final int menuSearch=Menu.FIRST+8;
 	private static final int ACTIVITY_EDIT = 0x1001;
 	private List<String> groupArray;  
     private List<List<String>> childArray; 
@@ -79,12 +83,32 @@ public class ShowNote extends ExpandableListActivity {
                                     use, centerID);
         getExpandableListView().setAdapter(adapter); 
     }
+    private void fillData(String item) {
+        cursor = dbHelper.searchNote(Table, item);
+        getUse();
+        groupArray = new ArrayList<String>();  
+        childArray = new ArrayList<List<String>>();  
+        while (cursor.moveToNext()) {
+        	List<String> tempArray01 = new ArrayList<String>();
+        	groupArray.add(cursor.getString(cursor.getColumnIndex(NotesDbAdapter.KEY_NOTE)));
+        	tempArray01.add(cursor.getString(cursor.getColumnIndex(NotesDbAdapter.KEY_CONTENTS))); 
+        	tempArray01.add(cursor.getString(cursor.getColumnIndex(NotesDbAdapter.KEY_SUMMARY)));
+        	tempArray01.add(cursor.getString(cursor.getColumnIndex(NotesDbAdapter.KEY_EXECUTOR)));
+        	childArray.add(tempArray01);  
+        }
+        ColorListAdapter adapter = new ColorListAdapter(this, 
+                                    groupArray, 
+                                    childArray, 
+                                    use, centerID);
+        getExpandableListView().setAdapter(adapter); 
+    }
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
             menu.add(0,menuInsert,0,R.string.addNote);
             menu.add(0,menuChange,0,R.string.retto);
             menu.add(0,menuCleanConficts,0,"清除矛盾");
             menu.add(0,menuCleanColor,0,"清除颜色");
+            menu.add(0,menuSearch,0,"查询笔记");
             return super.onCreateOptionsMenu(menu);
     }
     
@@ -103,6 +127,19 @@ public class ShowNote extends ExpandableListActivity {
                     intent.putExtra("TABLE", Table);
                     startActivityForResult(intent, ACTIVITY_EDIT);
                     break;
+            case menuSearch:
+            	final EditText inputServer = new EditText(this);
+                AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                builder.setTitle("Server").setIcon(android.R.drawable.ic_dialog_info).setView(inputServer)
+                        .setNegativeButton("Cancel", null);
+                builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                    		String input = inputServer.getText().toString();
+                    		fillData(input);
+                     }
+                });
+                builder.show();
+                break;
             case menuDelete:
             	dbHelper.delete(Table, getExpandableListView().getSelectedItemId());
             	break;
