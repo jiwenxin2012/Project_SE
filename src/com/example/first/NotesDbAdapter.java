@@ -1,5 +1,7 @@
 package com.example.first;
 import java.util.Date;
+
+import android.R.string;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
@@ -116,6 +118,15 @@ public class NotesDbAdapter {
                 if (mCursor != null) {
                         mCursor.moveToFirst();
                 }
+                return mCursor;
+        }
+     // query several note
+        public Cursor searchNote(String table, String name) throws SQLException {
+        	String current_sql_sel = "SELECT  * FROM "+table +" where "+KEY_NOTE+" like '%"+name+"%'"
+        							+ " or "+KEY_CONTENTS+" like '%"+name+"%'"
+        							+ " or "+KEY_SUMMARY+" like '%"+name+"%'"
+        							+ " or "+KEY_EXECUTOR+" like '%"+name+"%'";
+        	Cursor mCursor = db.rawQuery(current_sql_sel, null);
                 return mCursor;
         }
         

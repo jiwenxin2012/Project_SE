@@ -23,6 +23,8 @@ public class MainActivity extends ListActivity {
 	protected final int menuInsert=Menu.FIRST;
 	protected final int menuDelete=Menu.FIRST+1;
 	protected final int menuSearch=Menu.FIRST+2;
+	protected final int menuLogin=Menu.FIRST+3;
+	protected final int menuRegister=Menu.FIRST+4;
 	private static final int ACTIVITY_EDIT = 0x1001;
     private NotesDbAdapter dbHelper;
     private Cursor cursor;
@@ -73,6 +75,8 @@ public class MainActivity extends ListActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
             menu.add(0,menuInsert,0,R.string.addTable);
             menu.add(0,menuSearch,0,"²éÑ¯»°Ìâ");
+            menu.add(0,menuLogin,0,"µÇÂ¼");
+            menu.add(0,menuRegister,0,"×¢²á");
             return super.onCreateOptionsMenu(menu);
     }
     
@@ -98,6 +102,14 @@ public class MainActivity extends ListActivity {
                      }
                 });
                 builder.show();
+                break;
+            case menuLogin:
+            	Intent intent2 = new Intent(this, Login.class);
+                startActivityForResult(intent2, ACTIVITY_EDIT);
+                break;
+            case menuRegister:
+            	Intent intent3 = new Intent(this, register.class);
+                startActivityForResult(intent3, ACTIVITY_EDIT);
                 break;
             case menuDelete:
             	dbHelper.deleteTable(getListView().getSelectedItemId());
